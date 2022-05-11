@@ -1,0 +1,104 @@
+
+
+
+
+
+
+
+.MODEL SMALL
+.STACK 100H
+.DATA
+
+RES DW 100 DUP(?)
+
+.CODE
+
+MAIN PROC
+  
+  MOV AX, @DATA
+  MOV DS, AX
+  
+  ; SOLVE BY USING STACK 
+  
+  COMMENT @ 
+  
+  ;TAKE INPUT 
+  MOV AH, 1
+  MOV CX, 0; ALTERNATIVE = MOV XOR CX, CX
+  
+  INPUT:
+    INT 21H
+    
+    CMP AL, 0DH ; IF PRESSED ENTER
+    JE EXIT_INPUT
+    
+    PUSH AX;ELSE PUSH TO STACK
+    INC CX
+    JMP INPUT
+  
+  EXIT_INPUT:
+    ;ADJUST CARET AND GOTO NEW LINE. 
+    
+    MOV AH,2 
+    MOV DL, 13 ; 13 = 0DH
+    INT 21H
+    MOV DL, 10 ; 10 = 0AH
+    INT 21H
+    JCXZ EXIT ; IF CX == 0 THEN HAULT ELSE SHOW OUTPUT
+    
+  OUTPUT:
+    POP DX
+    INT 21H
+    LOOP OUTPUT
+    
+  EXIT:
+    MOV AH, 4CH
+    INT 21H    
+  @ 
+  
+  ; SOLVE NORMALLY
+  
+  ;COMMENT @
+  
+  ;TAKE INPUT 
+  MOV AH, 1
+  MOV CX, 0; ALTERNATIVE = MOV XOR CX, CX
+  MOV SI, 0
+  MOV DI, 0
+  MOV CX, 0
+  
+  INPUT:
+    INT 21H
+    
+    CMP AL, 0DH ; IF PRESSED ENTER
+    JE EXIT_INPUT
+    
+    MOV RES[DI], AX;ELSE STORE AS ARRAY
+    INC DI
+    JMP INPUT
+  
+  EXIT_INPUT:
+    ;ADJUST CARET AND GOTO NEW LINE. 
+    
+    MOV AH,2 
+    MOV DL, 13 ; 13 = 0DH
+    INT 21H
+    MOV DL, 10 ; 10 = 0AH
+    INT 21H
+    
+  OUTPUT:
+    DEC DI
+    MOV DX, RES[DI] 
+    INT 21H
+    CMP DI, 0
+    JL EXIT
+    JNL OUTPUT
+    
+  EXIT:
+    MOV AH, 4CH
+    INT 21H    
+  ;@    
+  
+  
+MAIN ENDP
+END MAIN
